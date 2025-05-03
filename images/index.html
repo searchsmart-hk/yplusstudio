@@ -1,33 +1,104 @@
-function doPost(e) {
-    try {
-      var blob = e.parameter.file;
-      if (!blob) {
-        // fallback if file isn't in e.parameter
-        blob = e.files?.file;
-      }
-  
-      // ✅ Use blob from formData
-      if (e.postData && e.postData.type === 'application/octet-stream') {
-        blob = Utilities.newBlob(e.postData.contents, 'image/jpeg', 'image_to_change.jpg');
-      }
-  
-      if (!blob) {
-        return ContentService.createTextOutput('ERROR: File blob is missing.');
-      }
-  
-      // ✅ Save the file to a specific folder or root
-      var folder = DriveApp.getFolderById('1H-F93aYRED5Bnd_xhI9XVVQHVe74XTRg'); // Optional: or DriveApp.getRootFolder()
-      var existingFiles = folder.getFilesByName('image_to_change.jpg');
-      while (existingFiles.hasNext()) {
-        existingFiles.next().setTrashed(true); // Remove old one
-      }
-  
-      var uploaded = folder.createFile(blob);
-      var url = uploaded.getUrl();
-  
-      return ContentService.createTextOutput(url);
-    } catch (err) {
-      return ContentService.createTextOutput('ERROR: ' + err.message);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Image to Google Drive</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
     }
-  }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+  </style>
+</head>
+<body>
+  <h2>Upload Image (SearchSmart)</h2>
+  <p>Only JPG format is allowed. Uploaded image will replace image_to_change.jpg.</p>
   
+  <form id="uploadForm">
+    <input type="file" id="image" accept="image/jpeg" required>
+    <button type="submit">Upload</button>
+  </form>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Clear previous messages
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('error').innerHTML = '';
+  
+      const file = document.getElementById('image').files[0];
+  
+      // Validate file
+      if (!file) {
+        document.getElementById('error').innerHTML = 'Please select a file to upload.';
+        return;
+      }
+  
+      if (file.type !== 'image/jpeg') {
+        document.getElementById('error').innerHTML = 'Only JPG/JPEG files are allowed.';
+        return;
+      }
+  
+      // ✅ Declare formData here (outside try block)
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', 'image_to_change.jpg');
+      formData.append('mimeType', 'image/jpeg');
+  
+      try {
+        document.getElementById('result').innerHTML = 'Uploading...';
+  
+        const res = await fetch('https://script.google.com/macros/s/AKfycbz_Ds7IE9jpfCJZ5QPC1P9-iduYnKOxQRsdpDa1lNUgGdYXw5DE3EhH96yPEAl2LZv0/exec', {
+          method: 'POST',
+          body: formData
+        });
+  
+        const resultText = await res.text();
+        console.log('Response:', resultText);
+  
+        if (resultText.startsWith('http')) {
+          document.getElementById('result').innerHTML = 
+            `<span class="success">✅ Image successfully uploaded as image_to_change.jpg</span><br>` +
+            `<a href="${resultText}" target="_blank">View Uploaded Image</a>`;
+        } else {
+          document.getElementById('error').innerHTML = resultText;
+          document.getElementById('result').innerHTML = '';
+        }
+      } catch (error) {
+        document.getElementById('error').innerHTML = 'Error uploading file: ' + error.message;
+        document.getElementById('result').innerHTML = '';
+      }
+    });
+  </script>
+  
+
+
+  
+  <p id="result"></p>
+  <p id="error" class="error"></p>
+
+  
+</body>
+</html>
