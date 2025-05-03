@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Upload images to Google Drive</title>
+  <title>Upload Image to Google Drive</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,56 +32,75 @@
   </style>
 </head>
 <body>
-  <h2>Upload images (SearchSmart)</h2>
-  <p>Only JPG format is allowed. Uploaded images will replace image_to_change.jpg.</p>
+  <h2>Upload Image (SearchSmart)</h2>
+  <p>Only JPG format is allowed. Uploaded image will replace image_to_change.jpg.</p>
   
   <form id="uploadForm">
-    <input type="file" id="images" accept="images/jpeg" required>
+    <input type="file" id="image" accept="image/jpeg" required>
     <button type="submit">Upload</button>
   </form>
+  
+  <p id="result"></p>
+  <p id="error" class="error"></p>
 
   <script>
+    // Function to convert file to base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+    
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       // Clear previous messages
       document.getElementById('result').innerHTML = '';
       document.getElementById('error').innerHTML = '';
-  
-      const file = document.getElementById('images').files[0];
-  
-      // Validate file
+      
+      const file = document.getElementById('image').files[0];
+      
+      // Check if file is selected
       if (!file) {
         document.getElementById('error').innerHTML = 'Please select a file to upload.';
         return;
       }
-  
-      if (file.type !== 'images/jpeg') {
+      
+      // Check if file is JPG/JPEG
+      if (file.type !== 'image/jpeg') {
         document.getElementById('error').innerHTML = 'Only JPG/JPEG files are allowed.';
         return;
       }
-  
-      // ✅ Declare formData here (outside try block)
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('filename', 'image_to_change.jpg');
-      formData.append('mimeType', 'images/jpeg');
-  
+      
       try {
+        document.getElementById('result').innerHTML = 'Converting file...';
+        
+        // Convert file to base64 string
+        const base64String = await fileToBase64(file);
+        
+        // Create form data with the base64 data
+        const formData = new FormData();
+        formData.append('filename', 'image_to_change.jpg');
+        formData.append('mimeType', 'image/jpeg');
+        formData.append('file', base64String.split(',')[1]); // Remove the data:image/jpeg;base64, part
+        
         document.getElementById('result').innerHTML = 'Uploading...';
-  
+        
         const res = await fetch('https://script.google.com/macros/s/AKfycbwUjiwhJ5TPlNnCj_kY1m0f7H6Mx5QLKHk3mnXu_wDbNIAPBEygGSLd_ripARBjWB5I/exec', {
           method: 'POST',
           body: formData
         });
-  
+
         const resultText = await res.text();
         console.log('Response:', resultText);
-  
+        
         if (resultText.startsWith('http')) {
           document.getElementById('result').innerHTML = 
-            `<span class="success">✅ images successfully uploaded as image_to_change.jpg</span><br>` +
-            `<a href="${resultText}" target="_blank">View Uploaded images</a>`;
+            `<span class="success">✅ Image successfully uploaded as image_to_change.jpg</span><br>` +
+            `<a href="${resultText}" target="_blank">View Uploaded Image</a>`;
         } else {
           document.getElementById('error').innerHTML = resultText;
           document.getElementById('result').innerHTML = '';
@@ -92,13 +111,5 @@
       }
     });
   </script>
-  
-
-
-  
-  <p id="result"></p>
-  <p id="error" class="error"></p>
-
-  
 </body>
 </html>
