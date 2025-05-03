@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Schedule Image Upload</title>
+</head>
+<body>
+  <h2>Upload Image (1x/month)</h2>
+  <form id="uploadForm">
+    <input type="file" id="image" accept="image/*" required>
+    <button type="submit">Upload</button>
+  </form>
+  <p id="result"></p>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const file = document.getElementById('image').files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await fetch('https://script.google.com/macros/s/AKfycbz_Ds7IE9jpfCJZ5QPC1P9-iduYnKOxQRsdpDa1lNUgGdYXw5DE3EhH96yPEAl2LZv0/exec', {
+        method: 'POST',
+        body: formData
+      });
+
+      const resultText = await res.text();
+      document.getElementById('result').innerHTML = 
+        resultText.startsWith('http') 
+          ? `<a href="${resultText}" target="_blank">✅ View Uploaded Image</a>` 
+          : `<span style="color:red;">${resultText}</span>`;
+    });
+  </script>
+</body>
+</html>
