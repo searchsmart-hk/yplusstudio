@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Schedule Image Upload</title>
+  <title>Upload Image to Google Drive</title>
 </head>
 <body>
-  <h2>Upload Image (1x/month)</h2>
+  <h2>Upload Image (SearchSmart)</h2>
   <form id="uploadForm">
     <input type="file" id="image" accept="image/*" required>
     <button type="submit">Upload</button>
@@ -25,9 +25,9 @@
       });
 
       const resultText = await res.text();
-      document.getElementById('result').innerHTML = 
-        resultText.startsWith('http') 
-          ? `<a href="${resultText}" target="_blank">✅ View Uploaded Image</a>` 
+      document.getElementById('result').innerHTML =
+        resultText.startsWith('http')
+          ? `<a href="${resultText}" target="_blank">✅ View Uploaded Image</a>`
           : `<span style="color:red;">${resultText}</span>`;
     });
   </script>
