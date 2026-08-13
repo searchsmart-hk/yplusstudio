@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>找不到頁面 &#8211; Y+Studio</title>
+<!--
+  Rescues the old .html links.
+
+  The pages used to be /classes.html and /contact.html; they are /classes and
+  /contact now. A redirect stub left at the old name CANNOT do this job: GitHub
+  Pages resolves /classes to classes.html before it looks at classes/index.html,
+  so the stub answered the clean URL as well as the old one and sent it to
+  itself — an endless redirect. Doing it from 404 is the only place that cannot
+  shadow the real page.
+-->
+<script>
+  var p = location.pathname;
+  if (/\.html$/i.test(p) && p !== '/404.html') {
+    location.replace(p.replace(/\.html$/i, '') + location.search + location.hash);
+  }
+</script>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #333;
+         display: flex; min-height: 90vh; align-items: center; justify-content: center; text-align: center; }
+  a { color: #81bffe; }
+</style>
+</head>
+<body>
+  <div>
+    <h1>找不到這個頁面</h1>
+    <p>Sorry, that page is not here.</p>
+    <p><a href="/">主頁</a> &nbsp;·&nbsp; <a href="/classes">課堂</a> &nbsp;·&nbsp; <a href="/contact">聯絡我們</a></p>
+  </div>
+</body>
+</html>
